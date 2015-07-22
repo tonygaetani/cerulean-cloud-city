@@ -12,30 +12,30 @@ contents
 --------
 metadata.yaml - yaml file describing the data of the band
 
-albums folder  - all albums of the band
+ - albums folder  - all albums of the band
 
-  album folder - all data for an album, the folder name is the name of the album
+  - album folder - all data for an album, the folder name is the name of the album
 
-    000song.mp3 - mp3 song
+   - 000song.mp3 - mp3 song
 
-    metadata.yaml - yaml file describing the data of the album
+   - metadata.yaml - yaml file describing the data of the album
 
-    album.zip
+   - album.zip
 
 
 directory structure
 -------------------
-/band
+ - /band
 
-  /album 1
+  -  /album 1
 
-    track1.mp3
+   -    track1.mp3
 
-    ...
+   -     ...
 
-    trackn.mp3
+   -     trackn.mp3
 
-  /album n
+  -   /album n
 
 
 github pages repository
@@ -74,11 +74,11 @@ OUTPUT_DIR (required)
 
 GIT_REPO or GIT_DIR (one is required)
 
-  one of these two is used as the cerulean cloud city git repository for music
+ - one of these two is used as the cerulean cloud city git repository for music
 
-  GIT_DIR a local directory (takes priority)
+ - GIT_DIR a local directory (takes priority)
 
-  GIT_REPO will be cloned into a temp dir and deleted (must be set exclusively) 
+ - GIT_REPO will be cloned into a temp dir and deleted (must be set exclusively) 
 
 
 SOUNDCLOUD_ACCESS_KEY_ID (required)

@@ -25,17 +25,17 @@ metadata.yaml - yaml file describing the data of the band
 
 directory structure
 -------------------
- - /band
+/band
 
-  -  /album 1
+ -  /album 1
 
-   -    track1.mp3
+  -    track1.mp3
 
-   -     ...
+  -     ...
 
-   -     trackn.mp3
+  -     trackn.mp3
 
-  -   /album n
+ -   /album n
 
 
 github pages repository

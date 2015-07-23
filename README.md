@@ -31,9 +31,9 @@ directory structure
 
   -    track1.mp3
 
-  -     ...
+  -    ...
 
-  -     trackn.mp3
+  -    trackn.mp3
 
  -   /album n
 

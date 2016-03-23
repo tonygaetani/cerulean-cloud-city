@@ -37,7 +37,8 @@ for track in client.get('/users/ceruleancity/tracks', limit=65):
 # global functions
 #
 
-def get_track_id(name):
+def get_track_id(path):
+    name = path[path.rfind('/'):].replace('.mp3', '')
     try:
         ret = track_title_2_id[name]
     except KeyError:
@@ -158,7 +159,7 @@ def main(templates_path, albums_path, build_path):
                         for line in track_template.readlines():
                             line = line.replace('~~TRACK_TITLE~~', track['name'])
                             line = line.replace('~~TRACK_NUMBER~~', str(track['number']))
-                            line = line.replace('~~TRACK_ID~~', get_track_id(track['name']))
+                            line = line.replace('~~TRACK_ID~~', get_track_id(track['path']))
                             line = line.replace('~~TRACK_DOWNLOAD_LINK~~', track_download_link(band_metadata, album, track))
                             album_page.write(line)
                 with open("{0}/footer.template.html".format(templates_path), 'r') as footer_template:

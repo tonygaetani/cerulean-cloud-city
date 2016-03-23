@@ -46,7 +46,7 @@ def get_track_id(name):
             score = Levenshtein.distance(str(title), str(name))
             if best is None or best[1] > score:
                 best = (title, score)
-        ret =  track_title_2_id[best[0]]
+        ret = track_title_2_id[best[0]]
     return str(ret)
 
 def filter_album_names(path, name):

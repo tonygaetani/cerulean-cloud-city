@@ -21,7 +21,7 @@ soundcloud_client_secret = os.environ['SOUNDCLOUD_CLIENT_SECRET']
 soundcloud_username = os.environ['SOUNDCLOUD_USERNAME']
 soundcloud_password = os.environ['SOUNDCLOUD_PASSWORD']
 
-soundcloud_full_list = ['Cerulean_Logwad', 'Kept From Knowledge or View', 'Beta']
+soundcloud_full_list = ['Cerulean_Logwad', 'Kept From Knowledge or View', 'Beta', 'ZOMG', 'Denial']
 
 # get a soundcloud client
 client = soundcloud.Client(

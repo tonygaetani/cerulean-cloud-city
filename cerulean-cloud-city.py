@@ -21,6 +21,8 @@ soundcloud_client_secret = os.environ['SOUNDCLOUD_CLIENT_SECRET']
 soundcloud_username = os.environ['SOUNDCLOUD_USERNAME']
 soundcloud_password = os.environ['SOUNDCLOUD_PASSWORD']
 
+soundcloud_full_list = ['Cerulean_Logwad', 'Kept From Knowledge or View']
+
 # get a soundcloud client
 client = soundcloud.Client(
     client_id=soundcloud_client_id,
@@ -30,7 +32,7 @@ client = soundcloud.Client(
 )
 
 track_title_2_id = {}
-for track in client.get('/users/ceruleancity/tracks', limit=65):
+for track in client.get('/users/ceruleancity/tracks', limit=150):
     track_title_2_id[track.title] = track.id
 
 #
@@ -38,6 +40,8 @@ for track in client.get('/users/ceruleancity/tracks', limit=65):
 #
 
 def get_track_id(path):
+    if any(map(lambda x: x in path, soundcloud_full_list)):
+        return ''
     name = path[path.rfind('/'):].replace('.mp3', '')
     try:
         ret = track_title_2_id[name]
@@ -84,7 +88,7 @@ def track_download_link(band_metadata, album, track):
 #
 
 def main(templates_path, albums_path, build_path):
-    band_metadata = {'name': 'Cerulean City',
+    band_metadata = {'name': 'Cerulean',
                      'description': 'Awesome music by Andrew Lake, Kieran McCoobery and Tony Gaetani',
                      'albums': [],
                      'git_root': 'https://raw.githubusercontent.com/marshzor/cerulean/master/'}
@@ -127,7 +131,7 @@ def main(templates_path, albums_path, build_path):
             for line in [template_line.replace('~~DESCRIPTION~~', band_metadata['description']) for template_line in description_template.readlines()]:
                 index.write(line)
         for album_index, album in enumerate(band_metadata['albums']):
-            album_page_name = "{0}.html".format(album['name'].replace(' ', '-'))
+            album_page_name = "{0}.html".format(urllib.quote(album['name'].replace(' ', '-')))
             album_page_path = "{0}/{1}".format(build_path, album_page_name)
             with open("{0}/album.template.html".format(templates_path), 'r') as album_template:
                 for line in album_template.readlines():

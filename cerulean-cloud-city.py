@@ -12,7 +12,7 @@ import re
 
 project_root = os.getenv('PROJECT_ROOT', os.path.dirname(os.path.realpath(__file__)))
 templates_root = os.getenv('TEMPLATES_ROOT', project_root + '/templates')
-band_root = os.getenv('BAND_ROOT', project_root + '../cerulean')
+band_root = os.getenv('BAND_ROOT', project_root + '/../cerulean')
 build_root = os.getenv('BUILD_ROOT', 'build')
 
 soundcloud_client_id = os.environ['SOUNDCLOUD_CLIENT_ID']

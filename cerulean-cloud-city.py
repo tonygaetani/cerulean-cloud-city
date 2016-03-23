@@ -2,6 +2,7 @@
 
 import os
 import soundcloud
+import urllib
 import Levenshtein
 import re
 
@@ -68,6 +69,14 @@ def clean_track_name(filename):
         name = name[:-1]
     return name.replace('_', ' ').strip()
 
+def album_download_link(band_metadata, album):
+    album_name = urllib.quote(album['name'])
+    return band_metadata['git_root'] + album_name + '/' + album_name + '.zip'
+
+def track_download_link(band_metadata, album, track):
+    track_filename = urllib.quote(track['path'][track['path'].rfind('/'):])
+    return band_metadata['git_root'] + urllib.quote(album['name']) + '/' + track_filename
+
 
 #
 # main program
@@ -77,7 +86,7 @@ def main(templates_path, albums_path, build_path):
     band_metadata = {'name': 'Cerulean City',
                      'description': 'Awesome music by Andrew Lake, Kieran McCoobery and Tony Gaetani',
                      'albums': [],
-                     'git_root': 'https://raw.githubusercontent.com/marshzor/cerulean/master'}
+                     'git_root': 'https://raw.githubusercontent.com/marshzor/cerulean/master/'}
     for album_name in filter(lambda a: filter_album_names(albums_path, a), os.listdir(albums_path)):
         album_path = os.path.join(albums_path, album_name)
         try:
@@ -123,7 +132,7 @@ def main(templates_path, albums_path, build_path):
                 for line in album_template.readlines():
                     line = line.replace('~~ALBUM~~', album['name'])
                     line = line.replace('~~ALBUM_PATH~~', album_page_name)
-                    line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', band_metadata['git_root'] + album['path'][album['path'].find(band_metadata['name'] + '/') + len(band_metadata['name']):] + '/' + album['name'].replace(' ', '%20') + '.zip')
+                    line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', album_download_link(band_metadata, album))
                     index.write(line)
             with open("{0}/description.template.html".format(templates_path), 'r') as description_template:
                 for line in [template_line.replace('~~DESCRIPTION~~', album['description']) for template_line in description_template.readlines()]:
@@ -139,7 +148,7 @@ def main(templates_path, albums_path, build_path):
                     for line in album_template.readlines():
                         line = line.replace('~~ALBUM~~', album['name'])
                         line = line.replace('~~ALBUM_PATH~~', album_page_name)
-                        line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', band_metadata['git_root'] + album['path'][album['path'].find(band_metadata['name'] + '/') + len(band_metadata['name']):] + '/' + album['name'].replace(' ', '%20') + '.zip')
+                        line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', album_download_link(band_metadata, album))
                         album_page.write(line)
                 with open("{0}/description.template.html".format(templates_path), 'r') as description_template:
                     for line in [template_line.replace('~~DESCRIPTION~~', album['description']) for template_line in description_template.readlines()]:
@@ -150,8 +159,7 @@ def main(templates_path, albums_path, build_path):
                             line = line.replace('~~TRACK_TITLE~~', track['name'])
                             line = line.replace('~~TRACK_NUMBER~~', str(track['number']))
                             line = line.replace('~~TRACK_ID~~', get_track_id(track['name']))
-                            download_link = band_metadata['git_root'] + track['path'][track['path'].find(band_metadata['name'] + '/') + len(band_metadata['name']):]
-                            line = line.replace('~~TRACK_DOWNLOAD_LINK~~', download_link)
+                            line = line.replace('~~TRACK_DOWNLOAD_LINK~~', track_download_link(band_metadata, album, track))
                             album_page.write(line)
                 with open("{0}/footer.template.html".format(templates_path), 'r') as footer_template:
                     for line in footer_template.readlines():

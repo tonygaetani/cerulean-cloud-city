@@ -1,58 +1,13 @@
 #!/usr/bin/env python
 
 import os
-import soundcloud
 import urllib
-import Levenshtein
 import re
-
-
-#
-# global Variables
-#
-
-project_root = os.getenv('PROJECT_ROOT', os.path.dirname(os.path.realpath(__file__)))
-templates_root = os.getenv('TEMPLATES_ROOT', project_root + '/templates')
-band_root = os.getenv('BAND_ROOT', project_root + '/../cerulean')
-build_root = os.getenv('BUILD_ROOT', 'build')
-
-soundcloud_client_id = os.environ['SOUNDCLOUD_CLIENT_ID']
-soundcloud_client_secret = os.environ['SOUNDCLOUD_CLIENT_SECRET']
-soundcloud_username = os.environ['SOUNDCLOUD_USERNAME']
-soundcloud_password = os.environ['SOUNDCLOUD_PASSWORD']
-
-soundcloud_full_list = ['Cerulean_Logwad', 'Kept From Knowledge or View', 'Beta', 'ZOMG', 'Denial']
-
-# get a soundcloud client
-client = soundcloud.Client(
-    client_id=soundcloud_client_id,
-    client_secret=soundcloud_client_secret,
-    username=soundcloud_username,
-    password=soundcloud_password,
-)
-
-track_title_2_id = {}
-for track in client.get('/users/ceruleancity/tracks', limit=150):
-    track_title_2_id[track.title] = track.id
+from argparse import ArgumentParser
 
 #
 # global functions
 #
-
-def get_track_id(path):
-    if any(map(lambda x: x in path, soundcloud_full_list)):
-        return ''
-    name = path[path.rfind('/'):].replace('.mp3', '')
-    try:
-        ret = track_title_2_id[name]
-    except KeyError:
-        best = None
-        for title in track_title_2_id.keys():
-            score = Levenshtein.distance(str(title), str(name))
-            if best is None or best[1] > score:
-                best = (title, score)
-        ret = track_title_2_id[best[0]]
-    return str(ret)
 
 def filter_album_names(path, name):
     if '.git' in name:
@@ -74,26 +29,29 @@ def clean_track_name(filename):
         name = name[:-1]
     return name.replace('_', ' ').strip()
 
+
 def album_download_link(band_metadata, album):
     album_name = urllib.quote(album['name'])
-    return band_metadata['git_root'] + album_name + '/' + album_name + '.zip'
+    return band_metadata['git_root'] + album['name'] + '/' + album_name + '.zip'
+
 
 def track_download_link(band_metadata, album, track):
     track_filename = urllib.quote(track['path'][track['path'].rfind('/'):])
     return band_metadata['git_root'] + urllib.quote(album['name']) + '/' + track_filename
 
 
-#
-# main program
-#
-
-def main(templates_path, albums_path, build_path):
-    band_metadata = {'name': 'Cerulean',
-                     'description': 'Awesome music by Andrew Lake, Kieran McCoobery and Tony Gaetani',
-                     'albums': [],
-                     'git_root': 'https://raw.githubusercontent.com/marshzor/cerulean/master/'}
-    for album_name in filter(lambda a: filter_album_names(albums_path, a), os.listdir(albums_path)):
-        album_path = os.path.join(albums_path, album_name)
+def get_metadata(path, band_name, git_root):
+    try:
+        with open(os.path.join(path, 'description'), 'r') as desc:
+            description = desc.read()
+    except Exception:
+        description = ''
+    metadata = {'name': band_name,
+                'description': description,
+                'albums': [],
+                'git_root': git_root}
+    for album_name in filter(lambda a: filter_album_names(path, a), os.listdir(path)):
+        album_path = os.path.join(path, album_name)
         try:
             with open(os.path.join(album_path, 'description'), 'r') as desc:
                 album_description = desc.read()
@@ -107,20 +65,30 @@ def main(templates_path, albums_path, build_path):
                            'name': track_name,
                            'path': os.path.join(album_path, track)})
             track_number += 1
-        band_metadata['albums'].append({'name': album_name,
-                                        'path': album_path,
-                                        'tracks': tracks,
-                                        'description': album_description})
+        metadata['albums'].append({'name': album_name,
+                                   'path': album_path,
+                                   'tracks': tracks,
+                                   'description': album_description})
+    return metadata
+
+
+#
+# main program
+#
+
+def main(templates_path, args):
+    # get the band metadata
+    band_metadata = get_metadata(args.band_path, args.band_name, args.binaries_path)
     # always clean html files
     try:
-        cleanup_files = [html_file for html_file in os.listdir(build_path) if html_file.endswith('.html')]
+        cleanup_files = [html_file for html_file in os.listdir(args.build_path) if html_file.endswith('.html')]
         for html_file in cleanup_files:
-            os.remove(build_path + '/' + str(html_file))
+            os.remove(args.build_path + '/' + str(html_file))
     except OSError:
         # if there's nothing there then make the directory
-        os.makedirs(build_path)
-
-    with open("{0}/index.html".format(build_path), 'w') as index:
+        os.makedirs(args.build_path)
+    # build the site
+    with open("{0}/index.html".format(args.build_path), 'w') as index:
         with open("{0}/header.template.html".format(templates_path), 'r') as header_template:
             for line in [template_line.replace('~~BAND~~', band_metadata['name']) for template_line in header_template.readlines()]:
                 index.write(line)
@@ -132,7 +100,7 @@ def main(templates_path, albums_path, build_path):
                 index.write(line)
         for album_index, album in enumerate(band_metadata['albums']):
             album_page_name = "{0}.html".format(urllib.quote(album['name'].replace(' ', '-')))
-            album_page_path = "{0}/{1}".format(build_path, album_page_name)
+            album_page_path = "{0}/{1}".format(args.build_path, album_page_name)
             with open("{0}/album.template.html".format(templates_path), 'r') as album_template:
                 for line in album_template.readlines():
                     line = line.replace('~~ALBUM~~', album['name'])
@@ -163,8 +131,8 @@ def main(templates_path, albums_path, build_path):
                         for line in track_template.readlines():
                             line = line.replace('~~TRACK_TITLE~~', track['name'])
                             line = line.replace('~~TRACK_NUMBER~~', str(track['number']))
-                            line = line.replace('~~TRACK_ID~~', get_track_id(track['path']))
-                            line = line.replace('~~TRACK_DOWNLOAD_LINK~~', track_download_link(band_metadata, album, track))
+                            line = line.replace('~~TRACK_DOWNLOAD_LINK~~',
+                                                track_download_link(band_metadata, album, track))
                             album_page.write(line)
                 with open("{0}/footer.template.html".format(templates_path), 'r') as footer_template:
                     for line in footer_template.readlines():
@@ -173,6 +141,32 @@ def main(templates_path, albums_path, build_path):
             for line in footer_template.readlines():
                 index.write(line)
 
-
 if __name__ == '__main__':
-    main(templates_root, band_root, build_root)
+    project_root = os.path.dirname(os.path.realpath(__file__))
+    parser = ArgumentParser(
+        description='generates a super awesome website based on a folder full of music',
+        epilog="""
+folder structure:
+band/
+    description
+    album1/
+        description
+        track1.mp3
+        track2.mp3
+        ...
+        trackn.mp3
+        album1.zip
+    album2/
+        track1.mp3
+        track2.mp3
+        ...
+        trackn.mp3
+        album2.zip
+    ...
+    albumn/""")
+    parser.add_argument('--band-name', default='Cerulean', help='name of the band')
+    parser.add_argument('--band-path', default=project_root + '/../cerulean', help='folder containing the music')
+    parser.add_argument('--build-path', default='build', help='where to put the website')
+    parser.add_argument('--binaries-path', default='https://raw.githubusercontent.com/marshzor/cerulean/master/',
+                        help='root path to binaries for download/streaming')
+    main(project_root + '/templates', parser.parse_args())

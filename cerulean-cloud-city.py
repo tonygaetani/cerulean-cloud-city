@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import shutil
 import urllib
 import re
 from argparse import ArgumentParser
@@ -71,6 +72,10 @@ def get_metadata(path, band_name, git_root):
                                    'description': album_description})
     return metadata
 
+def copy_deps(templates_path, build_path):
+    deps = map(lambda x: "{}/{}".format(templates_path, x), ('audio.min.js', 'jquery.min.js', 'audiojs.swf'))
+    map(lambda x: shutil.copyfile(x, build_path + '/' + shutil._basename(x)), deps)
+
 
 #
 # main program
@@ -88,58 +93,53 @@ def main(templates_path, args):
         # if there's nothing there then make the directory
         os.makedirs(args.build_path)
     # build the site
-    with open("{0}/index.html".format(args.build_path), 'w') as index:
-        with open("{0}/header.template.html".format(templates_path), 'r') as header_template:
+    with open("{}/index.html".format(args.build_path), 'w') as index:
+        with open("{}/band.header.template.html".format(templates_path), 'r') as header_template:
             for line in [template_line.replace('~~BAND~~', band_metadata['name']) for template_line in header_template.readlines()]:
                 index.write(line)
-        with open("{0}/band.template.html".format(templates_path), 'r') as band_template:
+        with open("{}/band.template.html".format(templates_path), 'r') as band_template:
             for line in [template_line.replace('~~BAND~~', band_metadata['name']) for template_line in band_template.readlines()]:
                 index.write(line)
-        with open("{0}/description.template.html".format(templates_path), 'r') as description_template:
+        with open("{}/description.template.html".format(templates_path), 'r') as description_template:
             for line in [template_line.replace('~~DESCRIPTION~~', band_metadata['description']) for template_line in description_template.readlines()]:
                 index.write(line)
         for album_index, album in enumerate(band_metadata['albums']):
-            album_page_name = "{0}.html".format(urllib.quote(album['name'].replace(' ', '-')))
-            album_page_path = "{0}/{1}".format(args.build_path, album_page_name)
-            with open("{0}/album.template.html".format(templates_path), 'r') as album_template:
+            album_page_name = "{}.html".format(urllib.quote(album['name'].replace(' ', '-')))
+            album_page_path = "{}/{}".format(args.build_path, album_page_name)
+            with open("{}/album.template.html".format(templates_path), 'r') as album_template:
                 for line in album_template.readlines():
                     line = line.replace('~~ALBUM~~', album['name'])
                     line = line.replace('~~ALBUM_PATH~~', album_page_name)
                     line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', album_download_link(band_metadata, album))
                     index.write(line)
-            with open("{0}/description.template.html".format(templates_path), 'r') as description_template:
+            with open("{}/description.template.html".format(templates_path), 'r') as description_template:
                 for line in [template_line.replace('~~DESCRIPTION~~', album['description']) for template_line in description_template.readlines()]:
                     index.write(line)
             with open(album_page_path, 'w') as album_page:
-                with open("{0}/header.template.html".format(templates_path), 'r') as header_template:
-                    for line in [template_line.replace('~~BAND~~', band_metadata['name']) for template_line in header_template.readlines()]:
-                        album_page.write(line)
-                with open("{0}/band.template.html".format(templates_path), 'r') as band_template:
-                    for line in [template_line.replace('~~BAND~~', band_metadata['name']) for template_line in band_template.readlines()]:
-                        album_page.write(line)
-                with open("{0}/album.template.html".format(templates_path), 'r') as album_template:
-                    for line in album_template.readlines():
+                with open("{}/album.header.template.html".format(templates_path), 'r') as header_template:
+                    for line in header_template.readlines():
+                        line = line.replace('~~BAND~~', band_metadata['name'])
                         line = line.replace('~~ALBUM~~', album['name'])
                         line = line.replace('~~ALBUM_PATH~~', album_page_name)
                         line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', album_download_link(band_metadata, album))
-                        album_page.write(line)
-                with open("{0}/description.template.html".format(templates_path), 'r') as description_template:
-                    for line in [template_line.replace('~~DESCRIPTION~~', album['description']) for template_line in description_template.readlines()]:
+                        line = line.replace('~~DESCRIPTION~~', album['description'])
                         album_page.write(line)
                 for track in album['tracks']:
-                    with open("{0}/track.template.html".format(templates_path), 'r') as track_template:
+                    with open("{}/track.template.html".format(templates_path), 'r') as track_template:
                         for line in track_template.readlines():
+                            line = line.replace('~~ALBUM~~', album['name'])
                             line = line.replace('~~TRACK_TITLE~~', track['name'])
-                            line = line.replace('~~TRACK_NUMBER~~', str(track['number']))
                             line = line.replace('~~TRACK_DOWNLOAD_LINK~~',
                                                 track_download_link(band_metadata, album, track))
                             album_page.write(line)
-                with open("{0}/footer.template.html".format(templates_path), 'r') as footer_template:
-                    for line in footer_template.readlines():
-                        album_page.write(line)
-        with open("{0}/footer.template.html".format(templates_path), 'r') as footer_template:
-            for line in footer_template.readlines():
-                index.write(line)
+                with open("{}/album.end.template.html".format(templates_path), 'r') as album_end_template:
+                    album_page.write(album_end_template.read())
+                with open("{}/footer.template.html".format(templates_path), 'r') as footer_template:
+                    album_page.write(footer_template.read())
+        with open("{}/footer.template.html".format(templates_path), 'r') as footer_template:
+            index.write(footer_template.read())
+    # copy the dependencies
+    copy_deps(templates_path, args.build_path)
 
 if __name__ == '__main__':
     project_root = os.path.dirname(os.path.realpath(__file__))

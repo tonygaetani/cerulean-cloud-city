@@ -145,25 +145,7 @@ if __name__ == '__main__':
     project_root = os.path.dirname(os.path.realpath(__file__))
     parser = ArgumentParser(
         description='generates a super awesome website based on a folder full of music',
-        epilog="""
-folder structure:
-band/
-    description
-    album1/
-        description
-        track1.mp3
-        track2.mp3
-        ...
-        trackn.mp3
-        album1.zip
-    album2/
-        track1.mp3
-        track2.mp3
-        ...
-        trackn.mp3
-        album2.zip
-    ...
-    albumn/""")
+        epilog='see http://github.com/tonygaetani/cerulean-cloud-city for more details')
     parser.add_argument('--band-name', default='Cerulean', help='name of the band')
     parser.add_argument('--band-path', default=project_root + '/../cerulean', help='folder containing the music')
     parser.add_argument('--build-path', default='build', help='where to put the website')

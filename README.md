@@ -1,7 +1,9 @@
 cerulean cloud city
 ===================
 This repository auto-generates the a band website. The website contains a 
+
 homepage with links to each album, and a page for each album. You can see a 
+
 working example at http://ceruleancity.github.io.
 
 usage
@@ -28,6 +30,7 @@ optional arguments:
 
 folder structure
 ----------------
+```
 band-path/
 ---------/description
 ---------/album1/
@@ -45,3 +48,4 @@ band-path/
 ----------------/album2.zip
 ---------/...
 ---------/albumn/
+```

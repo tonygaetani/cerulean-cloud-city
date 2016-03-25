@@ -15,8 +15,10 @@
                 var next = $('ol li.playing').next();
                 if (!next.length) next = $('ol li').first();
                 next.addClass('playing').siblings().removeClass('playing');
-                audio.load($('a', next).attr('data-src'));
+                var next_link = $('a', next);
+                audio.load(next_link.attr('data-src'));
                 audio.play();
+                document.getElementById('current_track').innerHTML = next_link.attr('track-title');
             }
         });
 

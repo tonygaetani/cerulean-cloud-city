@@ -1,10 +1,6 @@
 cerulean cloud city
 ===================
-This repository auto-generates the a band website. The website contains a 
-
-homepage with links to each album, and a page for each album. You can see a 
-
-working example at http://ceruleancity.github.io.
+This repository auto-generates a band website. The website contains a homepage with links to each album, and a page for each album. You can see a working example at http://ceruleancity.github.io.
 
 usage
 =====

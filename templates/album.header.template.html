@@ -21,28 +21,25 @@ $(document).ready(function() {
         playlist = $('#playlist');
         tracks = playlist.find('li a');
         len = tracks.length - 1;
-        playlist.find('a').click(function(e){
+        playlist.find('a').click(function(e) {
             e.preventDefault();
             link = $(this);
             current = link.parent().index();
             run(link, audio[0]);
         });
-        audio[0].addEventListener('ended',function(e){
+        audio[0].addEventListener('ended',function(e) {
             current++;
-            if(current == len){
+            if(current == len) {
                 current = 0;
                 link = playlist.find('a')[0];
-            }else{
+            } else {
                 link = playlist.find('a')[current];
             }
-            run($(link),audio[0]);
+            run($(link), audio[0]);
         });
     }
-    function run(link, player){
-            console.log(link);
-            console.log(link.attr('href'));
+    function run(link, player) {
             player.src = link.attr('href');
-            console.log(link.attr('href'));
             par = link.parent();
             par.addClass('active').siblings().removeClass('active');
             audio[0].load();
@@ -63,7 +60,7 @@ $(document).ready(function() {
             <div class="current_track">
               <p>Current Track: <span id="current_track">~~FIRST_TRACK_TITLE~~</span></p>
             </div>
-            <audio id="audio" preload="auto" tabindex="0" controls="" type="audio/mpeg">
+            <audio id="audio" preload controls>
                 <source type="audio/mp3" src="~~FIRST_TRACK_DOWNLOAD_LINK~~">
                 Sorry, your browser does not support HTML5 audio.
             </audio>

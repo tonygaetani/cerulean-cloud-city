@@ -123,6 +123,8 @@ def main(templates_path, args):
                         line = line.replace('~~ALBUM_PATH~~', album_page_name)
                         line = line.replace('~~ALBUM_DOWNLOAD_LINK~~', album_download_link(band_metadata, album))
                         line = line.replace('~~DESCRIPTION~~', album['description'])
+                        line = line.replace('~~FIRST_TRACK_DOWNLOAD_LINK~~', track_download_link(band_metadata, album, album['tracks'][0]))
+                        line = line.replace('~~FIRST_TRACK_TITLE~~', album['tracks'][0]['name'])
                         album_page.write(line)
                 for track in album['tracks']:
                     with open("{}/track.template.html".format(templates_path), 'r') as track_template:

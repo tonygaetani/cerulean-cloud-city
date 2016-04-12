@@ -29,11 +29,11 @@ $(document).ready(function() {
         });
         audio[0].addEventListener('ended',function(e) {
             current++;
-            if(current < len) {
-                link = playlist.find('a.play_track')[current];
-            } else {
+            if(current > len) {
                 current = 0;
                 link = playlist.find('a.play_track')[0];
+            } else {
+                link = playlist.find('a.play_track')[current];
             }
             run($(link), audio[0]);
         });

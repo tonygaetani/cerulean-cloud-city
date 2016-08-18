@@ -72,11 +72,6 @@ def get_metadata(path, band_name, git_root):
                                    'description': album_description})
     return metadata
 
-def copy_deps(templates_path, build_path):
-    deps = map(lambda x: "{}/{}".format(templates_path, x), ('audio.min.js', 'jquery.min.js', 'audiojs.swf'))
-    map(lambda x: shutil.copyfile(x, build_path + '/' + shutil._basename(x)), deps)
-
-
 #
 # main program
 #
@@ -140,8 +135,7 @@ def main(templates_path, args):
                     album_page.write(footer_template.read())
         with open("{}/footer.template.html".format(templates_path), 'r') as footer_template:
             index.write(footer_template.read())
-    # copy the dependencies
-    copy_deps(templates_path, args.build_path)
+
 
 if __name__ == '__main__':
     project_root = os.path.dirname(os.path.realpath(__file__))

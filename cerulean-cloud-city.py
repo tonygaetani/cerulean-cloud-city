@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import os
-import shutil
 import urllib
 import re
+import natsort
 from argparse import ArgumentParser
 
 #
@@ -51,7 +51,8 @@ def get_metadata(path, band_name, git_root):
                 'description': description,
                 'albums': [],
                 'git_root': git_root}
-    for album_name in filter(lambda a: filter_album_names(path, a), os.listdir(path)):
+    album_paths = natsort.natsorted(os.listdir(path))
+    for album_name in filter(lambda a: filter_album_names(path, a), album_paths):
         album_path = os.path.join(path, album_name)
         try:
             with open(os.path.join(album_path, 'description'), 'r') as desc:
@@ -60,7 +61,8 @@ def get_metadata(path, band_name, git_root):
             album_description = 'Shorts are comfy and easy to wear!'
         tracks = []
         track_number = 1
-        for track in filter(filter_tracks, os.listdir(album_path)):
+        track_paths = natsort.natsorted(os.listdir(album_path))
+        for track in filter(filter_tracks, track_paths):
             track_name = clean_track_name(track)
             tracks.append({'number': track_number,
                            'name': track_name,

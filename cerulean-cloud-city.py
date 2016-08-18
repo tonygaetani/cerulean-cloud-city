@@ -3,6 +3,7 @@
 import os
 import urllib
 import re
+import shutil
 import natsort
 from argparse import ArgumentParser
 
@@ -74,6 +75,10 @@ def get_metadata(path, band_name, git_root):
                                    'description': album_description})
     return metadata
 
+def copy_deps(templates_path, build_path):
+    deps = map(lambda x: "{}/{}".format(templates_path, x), ('jquery.min.js',))
+    map(lambda x: shutil.copyfile(x, build_path + '/' + shutil._basename(x)), deps)
+
 #
 # main program
 #
@@ -137,6 +142,8 @@ def main(templates_path, args):
                     album_page.write(footer_template.read())
         with open("{}/footer.template.html".format(templates_path), 'r') as footer_template:
             index.write(footer_template.read())
+    # copy the dependencies
+    copy_deps(templates_path, args.build_path)
 
 
 if __name__ == '__main__':
